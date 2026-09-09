@@ -33,10 +33,18 @@ camera.position.set(0, 4, -12);
 
 const renderer = new THREE.WebGLRenderer()
 renderer.setSize(window.innerWidth, window.innerHeight)
+renderer.shadowMap.enabled = true
+renderer.shadowMap.type = THREE.PCFSoftShadowMap
 document.body.appendChild(renderer.domElement)
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, Math.PI)
-directionalLight.position.set(1, 1, 1)
+const directionalLight = new THREE.DirectionalLight(0xffffff, Math.PI/2)
+directionalLight.position.set(8, 7, -6)
+directionalLight.castShadow = true
+directionalLight.shadow.mapSize.set(2048, 2048)
+directionalLight.shadow.camera.left = -10
+directionalLight.shadow.camera.right = 10
+directionalLight.shadow.camera.top = 10
+directionalLight.shadow.camera.bottom = -10
 scene.add(directionalLight)
 
 let environmentTexture: THREE.DataTexture;
@@ -53,7 +61,7 @@ const ground = new THREE.Mesh(
   new THREE.MeshStandardMaterial({ color: 0x000000, roughness: 1 })
 );
 ground.rotation.x = -Math.PI / 2;
-ground.position.y = -0.5;
+ground.position.y = 0;
 ground.receiveShadow = true;
 scene.add(ground);
 
