@@ -53,7 +53,7 @@ hdr_loader.load(HDR_URL, (texture) => {
   environmentTexture = texture;
   environmentTexture.mapping = THREE.EquirectangularReflectionMapping;
   scene.environment = environmentTexture;
-  scene.environmentIntensity = 1;
+  scene.environmentIntensity = 0.5;
 })
 
 const ground = new THREE.Mesh(
