@@ -17,7 +17,19 @@ const FASCIA = 0.02;
 
 const JOIST = 0.05;                               // lodge_150x50x1000, joist width
 const Y_JOIST = 0.15;   
-const STEP_JOIST = 0.5;  
+const STEP_JOIST = 0.5; 
+
+const FILLER = 0.2;  
+const STEP_FILLER = 0.6; 
+
+
+const PLANK = 0.19;                               // Lodge_20x190x1000_bevel, deck plank width
+const Y_DECK = 0.3;           // "deck rests on the inner fascia"
+const Y_MEMBRANE = 0.32;
+const Y_FASCIA_TOP = 0.4;
+
+
+const PROFILE = { height: 0.0668, width: 0.134 };
 
 const gui = new GUI();
 
@@ -151,6 +163,53 @@ function buildBuilding(
       add('lodge_150x50x1000', [-joistLength / 2, top + Y_JOIST, c - JOIST / 2], 0, [joistLength, 1, 1]);
     }
   }
+
+
+
+  // --- fillers that close the gap between the outer beam and the inner fascia ---
+  const half = (longX ? width : depth) / 2;
+  const gapFrom = half - COLUMN.size / 2 + JOIST / 2;
+  const gapTo = half + OUT_INNER - FASCIA;
+  const fillerScale: [number, number, number] = [(gapTo - gapFrom) / FILLER, 1, 1];
+  for (const c of stepsBetween(longX ? zs : xs, STEP_FILLER)) {
+    if (longX) {
+      add('lodge_150x50x200', [gapFrom, top + Y_JOIST, c - JOIST / 2], 0, fillerScale);
+      add('lodge_150x50x200', [-gapFrom, top + Y_JOIST, c + JOIST / 2], Math.PI, fillerScale);
+    } else {
+      add('lodge_150x50x200', [c + JOIST / 2, top + Y_JOIST, gapFrom], -Math.PI / 2, fillerScale);
+      add('lodge_150x50x200', [c - JOIST / 2, top + Y_JOIST, -gapFrom], Math.PI / 2, fillerScale);
+    }
+  }
+
+
+   // --- deck: 20x190 planks along the long side, out to the outer edge of the fascia ---
+  const deckX = width / 2 + OUT_INNER;
+  const deckZ = depth / 2 + OUT_INNER;
+  const plankRun = longX ? 2 * deckX : 2 * deckZ;
+  const across = longX ? 2 * deckZ : 2 * deckX;
+  const plankCount = Math.max(1, Math.round(across / PLANK));
+  const plankWidth = across / plankCount;
+  const plankScale: [number, number, number] = [plankWidth / PLANK, 1, plankRun];
+  for (let i = 0; i < plankCount; i++) {
+    const c = -across / 2 + (i + 0.5) * plankWidth;
+    if (longX) add('Lodge_20x190x1000_bevel', [-deckX, top + Y_DECK, c], -Math.PI / 2, plankScale);
+    else add('Lodge_20x190x1000_bevel', [c, top + Y_DECK, deckZ], 0, plankScale);
+  }
+
+  // --- roof covering, "fills the space between the outer fascias" ---
+  add('ruberoid_1000x1000x2', [-deckX, top + Y_MEMBRANE, deckZ], 0, [2 * deckX, 1, 2 * deckZ]);
+
+  //--- perimeter profile, covers the outer fascia ---
+  const px = width / 2 -0.001 + OUT_OUTER;
+  const pz = depth / 2 -0.001 + OUT_OUTER;
+  const py = top + Y_FASCIA_TOP - 0.001 - PROFILE.height; // 1 mm offset to avoid z-fighting on the top faces
+  const zRun = 2 * pz - 2 * PROFILE.width;
+  add('profile_canopy_perimeter_closed', [-px, py, pz], 0, [2 * px, 1, 1]);
+  add('profile_canopy_perimeter_closed', [px, py, -pz], Math.PI, [2 * px, 1, 1]);
+  add('profile_canopy_perimeter_closed', [-px, py, -pz + PROFILE.width], -Math.PI / 2, [zRun, 1, 1]);
+  add('profile_canopy_perimeter_closed', [px, py, pz - PROFILE.width], Math.PI / 2, [zRun, 1, 1]);
+
+
 
   return group;
 }

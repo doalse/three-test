@@ -15,8 +15,8 @@ const HDR_URL = 'textures/studio.hdr';
 const scene = new THREE.Scene();
 scene.background = new THREE.Color(0xdfe4ea);
 
-const axesHelper = new THREE.AxesHelper( 5 );
-scene.add( axesHelper );
+// const axesHelper = new THREE.AxesHelper( 5 );
+// scene.add( axesHelper );
 
 const size = 10;
 const divisions = 10;
@@ -70,6 +70,8 @@ window.addEventListener('resize', () => {
 })
 
 const controls = new OrbitControls(camera, renderer.domElement);
+controls.target.set(0, 2.5, 0); // піднімаємо точку погляду камери -> сцена в кадрі опускається нижче
+controls.update();
 
 loadParts(modelsUrl);
 
